@@ -81,3 +81,260 @@ Tools for Production-Ready Deployment
 Docker: Containerize your application for consistency across environments.
 Amazon ECS/EKS: Use managed container services for easier scalability and orchestration.
 Elastic Beanstalk: Simplify deployment and scaling without needing to manage the underlying infrastructure manually.
+
+2. complete k8s setup and configuration to deploy an application to a pod give an example by deploying a application live
+
+To deploy an application to Kubernetes (K8s), we’ll cover the setup of a K8s cluster and demonstrate deploying a simple web application to a pod. This guide assumes you are using a tool like Minikube (for local setups) or Amazon EKS, Google Kubernetes Engine (GKE), or Azure AKS for cloud-hosted clusters.
+
+1. Set Up the Kubernetes Cluster
+Local Setup Using Minikube:
+Install Minikube:
+
+bash
+Copy code
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+Start Minikube:
+
+bash
+Copy code
+minikube start --driver=docker
+Cloud Setup Using Amazon EKS:
+Install AWS CLI and eksctl:
+
+bash
+Copy code
+curl "https://awscli.amazonaws.com/aws-cli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+curl -sLO https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz
+tar -xzf eksctl_$(uname -s)_amd64.tar.gz
+sudo mv eksctl /usr/local/bin
+Create a cluster:
+
+bash
+Copy code
+eksctl create cluster --name demo-cluster --nodes 2
+Configure kubectl to use your EKS cluster:
+
+bash
+Copy code
+aws eks update-kubeconfig --region <region> --name demo-cluster
+2. Deploy an Application
+We'll deploy a simple Nginx web server as a demonstration.
+
+Step 1: Write Deployment YAML
+Create a file named nginx-deployment.yaml:
+
+yaml
+Copy code
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+Step 2: Deploy to Kubernetes
+Apply the deployment:
+
+bash
+Copy code
+kubectl apply -f nginx-deployment.yaml
+Check the status of the pods:
+
+bash
+Copy code
+kubectl get pods
+Step 3: Expose the Deployment
+Expose the application via a service:
+
+bash
+Copy code
+kubectl expose deployment nginx-deployment --type=NodePort --port=80
+Get the service details:
+
+bash
+Copy code
+kubectl get services
+Access the application:
+
+For Minikube:
+bash
+Copy code
+minikube service nginx-deployment
+For cloud clusters: Access the EXTERNAL-IP shown under kubectl get services.
+3. Verify the Application
+Access the application in your browser or via curl:
+
+bash
+Copy code
+curl <NodePort/External-IP>:<port>
+4. Automate with Helm
+Using Helm simplifies deployments, especially for larger applications.
+
+Install Helm:
+
+bash
+Copy code
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+Create a Helm chart for Nginx:
+
+bash
+Copy code
+helm create nginx-app
+Update values.yaml and deploy:
+
+bash
+Copy code
+helm install nginx-release ./nginx-app
+5. Monitor the Application
+View logs:
+
+bash
+Copy code
+kubectl logs <pod-name>
+Monitor resources:
+
+bash
+Copy code
+kubectl top pods
+kubectl top nodes
+
+3. How to detect diskspace issue in ansible in production
+
+Detecting disk space issues in a production environment using Ansible can be automated by gathering facts about disk usage on the target systems and setting thresholds for alerts. Here’s how you can do it:
+
+1. Create a Playbook to Detect Disk Space Issues
+Below is an example Ansible playbook:
+
+yaml
+Copy code
+---
+- name: Check Disk Space Usage
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Check disk usage
+      command: df -h
+      register: disk_usage
+
+    - name: Parse disk usage and alert on high usage
+      shell: |
+        df -h | awk '{if($5 ~ /%/ && int($5) > 80) print $0}'
+      register: high_usage
+      changed_when: false
+
+    - name: Display alert for high disk usage
+      debug:
+        msg: >
+          The following filesystems have high disk usage:
+          {{ high_usage.stdout_lines }}
+      when: high_usage.stdout_lines | length > 0
+2. Explanation of the Playbook:
+Gather Disk Usage:
+
+The df -h command retrieves disk space usage in human-readable format.
+Parse Disk Usage:
+
+A shell command checks if disk utilization exceeds 80% (configurable threshold).
+Trigger Alerts:
+
+If any filesystem crosses the threshold, an alert is generated and displayed using the debug module.
+3. Run the Playbook
+Execute the playbook with:
+
+bash
+Copy code
+ansible-playbook check_disk_space.yml -i inventory
+Replace inventory with your inventory file.
+
+4. Automate Alerts with Email or Monitoring Tools
+You can integrate the detection script with alerting tools like email or monitoring systems:
+
+Email Alert: Add a task to send an email when high disk usage is detected:
+
+yaml
+Copy code
+- name: Send email alert
+  mail:
+    host: smtp.example.com
+    port: 587
+    to: "admin@example.com"
+    subject: "Disk Space Alert"
+    body: >
+      High disk usage detected:
+      {{ high_usage.stdout_lines }}
+  when: high_usage.stdout_lines | length > 0
+Integration with Monitoring Tools:
+
+Send data to systems like Prometheus, Nagios, or Splunk for visualization and tracking.
+5. Alternative: Use Ansible Facts
+If you prefer using built-in Ansible facts:
+
+yaml
+Copy code
+- name: Check disk space using Ansible facts
+  hosts: all
+  tasks:
+    - name: Warn if any partition exceeds 80% usage
+      debug:
+        msg: "Filesystem {{ item.mount }} is {{ item.size_available }} available, exceeding threshold!"
+      with_items: "{{ ansible_mounts }}"
+      when: item.size_available | int < (item.size_total | int * 0.2)
+6. Best Practices
+Set Thresholds: Define appropriate disk usage thresholds for your production environment.
+Schedule Regular Checks: Use a cron job or CI/CD pipeline to run the playbook periodically.
+Remediate Automatically: Add tasks to clean temporary files or extend volumes when disk space is low.
+By using this approach, you can proactively detect and address disk space issues in your production environment. Let me know if you’d like further clarification!
+
+4. diff between EKS and k8s and which one is preferred one and why?
+
+Difference Between Amazon EKS and Kubernetes (K8s)
+Aspect	Kubernetes (K8s)	Amazon EKS (Elastic Kubernetes Service)
+Definition	Open-source container orchestration platform.	Managed Kubernetes service provided by AWS.
+Management	Fully managed by the user (cluster setup, updates, etc.).	AWS manages the control plane and infrastructure.
+Control Plane	Set up manually by the user.	AWS provides a managed, highly available control plane.
+Worker Nodes	Set up and maintained by the user.	Managed by the user but integrates with AWS services.
+Integration	Limited native integrations with cloud providers.	Deep integration with AWS services (IAM, VPC, ALB, etc.).
+Cost	Only pay for the resources you provision.	Pay for worker nodes + EKS control plane ($0.10/hour).
+Scaling	Manual or custom auto-scaling configuration.	Integrates with AWS Auto Scaling for seamless scaling.
+Networking	Requires configuration of networking components.	Integrated with AWS VPC for simplified networking.
+Security	Needs manual configuration for access control.	Uses AWS IAM for enhanced access and identity management.
+Updates	User is responsible for updating the cluster.	AWS handles control plane updates; user manages worker nodes.
+When to Use Kubernetes (K8s)
+Use K8s if:
+You need complete control over your cluster setup and configuration.
+You plan to run Kubernetes on-premises or in a multi-cloud environment.
+Cost is a major concern, and you prefer avoiding managed service fees.
+You have a team experienced in Kubernetes operations.
+When to Use Amazon EKS
+Use EKS if:
+You want to reduce operational overhead, as AWS manages the control plane.
+You need native AWS integrations (e.g., IAM for RBAC, ALB for ingress).
+You are running a production-grade application and need high availability.
+You want to focus on application development rather than managing Kubernetes infrastructure.
+Which is Preferred?
+Amazon EKS is generally preferred in production environments when:
+Your infrastructure is already on AWS.
+You need a scalable, reliable, and secure Kubernetes environment with less operational effort.
+Kubernetes (Self-Managed) is better when:
+You need control over every detail of your cluster.
+You are running workloads on-premises or across multiple cloud providers.
+
+
+
