@@ -336,5 +336,155 @@ Kubernetes (Self-Managed) is better when:
 You need control over every detail of your cluster.
 You are running workloads on-premises or across multiple cloud providers.
 
+Pre requisites for creating a service in AWS like ec2,s3,vpc,load balancer,lambda,autoscaling,cloudwatch,ECR,ECS,EKS??
+
+General Prerequisites
+AWS Account:
+
+Ensure you have a valid AWS account with billing enabled.
+IAM Permissions:
+
+Use an IAM user or role with the required permissions for each service.
+Attach policies like AdministratorAccess or granular service-specific policies (e.g., AmazonEC2FullAccess, AmazonS3FullAccess).
+AWS CLI:
+
+Install the AWS CLI for managing resources via command line:
+bash
+Copy code
+curl "https://awscli.amazonaws.com/aws-cli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+Configure it with access keys:
+bash
+Copy code
+aws configure
+Region Selection:
+
+Ensure your services are deployed in the correct AWS region to avoid latency or compatibility issues.
+Prerequisites for Specific Services
+1. EC2 (Elastic Compute Cloud)
+Key Pair:
+Create an SSH key pair in the AWS Management Console or locally.
+VPC:
+Ensure a VPC, subnet, and security group are available.
+IAM Role:
+For accessing other AWS services (e.g., S3 from EC2), attach an IAM role to the instance.
+2. S3 (Simple Storage Service)
+Bucket Name:
+Choose a unique bucket name within the AWS region.
+IAM Permissions:
+s3:CreateBucket, s3:PutObject, and s3:GetObject permissions.
+Versioning (Optional):
+Enable versioning for better data management.
+Encryption (Optional):
+Choose server-side encryption (SSE-S3, SSE-KMS).
+3. VPC (Virtual Private Cloud)
+CIDR Block:
+Define an IP range for the VPC (e.g., 10.0.0.0/16).
+Subnets:
+Create subnets (private and public) based on your application architecture.
+Internet Gateway:
+Attach an Internet Gateway for public access if required.
+4. Load Balancer
+VPC Configuration:
+Ensure the target group and instances are in a valid VPC.
+Subnets:
+Specify subnets for the load balancer.
+Security Groups:
+Configure security group rules to allow inbound traffic (e.g., HTTP/HTTPS).
+5. Lambda
+IAM Role:
+Create a role with the necessary permissions (e.g., AWSLambdaBasicExecutionRole).
+Code Package:
+Prepare your function code as a zip file or upload it from a version control system.
+Trigger Configuration:
+Set up triggers like S3, API Gateway, or EventBridge.
+6. Auto Scaling
+Launch Template:
+Create a launch template with AMI, instance type, and network configuration.
+Scaling Policies:
+Define scaling policies (e.g., CPU utilization thresholds).
+7. CloudWatch
+IAM Role:
+Attach the CloudWatchAgentServerPolicy to allow logging.
+Metrics/Logs Configuration:
+Enable detailed monitoring for services like EC2, RDS, and Lambda.
+CloudWatch Agent:
+Install and configure the CloudWatch agent on EC2 instances.
+8. ECR (Elastic Container Registry)
+IAM Permissions:
+Permissions for ecr:CreateRepository, ecr:GetAuthorizationToken, and ecr:BatchCheckLayerAvailability.
+Docker Installed:
+Install Docker for building and pushing images.
+Authenticate Docker to ECR:
+bash
+Copy code
+aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <account_id>.dkr.ecr.<region>.amazonaws.com
+9. ECS (Elastic Container Service)
+ECR Repository:
+Create and push container images to ECR or other repositories.
+Task Definition:
+Define the task with container details, memory, and CPU requirements.
+Cluster:
+Create an ECS cluster (Fargate or EC2-backed).
+10. EKS (Elastic Kubernetes Service)
+IAM Role:
+Use eksctl to create an IAM role for the control plane.
+Cluster Configuration:
+Set up a cluster with eksctl:
+bash
+Copy code
+eksctl create cluster --name <cluster-name> --nodes 2 --region <region>
+kubectl Configured:
+Install and configure kubectl to interact with the EKS cluster.
+Node Groups:
+Create node groups or use Fargate for serverless worker nodes.
+
+functionality of splunk board
+
+Key Functionalities of Splunk Dashboards
+1. Data Visualization
+Display data using various visualization options:
+Charts: Pie, bar, line, area, scatter, etc.
+Tables: Display detailed tabular data.
+Maps: Geographical visualizations for location-based data.
+Single Value Panels: Show key performance indicators (KPIs).
+Customize the appearance, format, and style of these visualizations.
+2. Real-Time Monitoring
+Set dashboards to display live data streams for real-time system or application monitoring.
+Update frequency can be configured (e.g., every few seconds or minutes).
+3. Interactive Filtering
+Add time range pickers to filter data based on custom time windows.
+Use dropdowns, checkboxes, or sliders to filter and refine data dynamically.
+Enable drill-down functionality to explore specific data points in more detail.
+4. Data Aggregation
+Perform advanced data aggregation using Splunk's Search Processing Language (SPL).
+Summarize metrics such as averages, counts, sums, or percentages for specific fields.
+5. Alerts and Notifications
+Configure alerts to trigger based on thresholds or anomalies observed in dashboard data.
+Notifications can be sent via email, SMS, or integration with external tools like Slack or PagerDuty.
+6. Sharing and Collaboration
+Share dashboards with team members:
+Public, private, or role-based access controls.
+Export dashboards as PDFs or images for reporting.
+Embed dashboards into external web applications or portals.
+7. Customization and Layout
+Drag-and-drop panels to design flexible layouts.
+Use Splunk's Dashboard Studio for advanced customization (HTML, CSS, and JavaScript support).
+Add custom logos, images, or branding.
+
+Use Cases for Splunk Dashboards
+IT Operations:
+Monitor server health, network traffic, and application performance.
+DevOps:
+Track CI/CD pipeline metrics and deployment statuses.
+Security:
+Visualize threat intelligence and monitor intrusion detection systems.
+Business Analytics:
+Analyze customer behavior, sales trends, and operational KPIs.
+Compliance:
+Track audit logs and ensure adherence to regulations.
+
+
 
 
