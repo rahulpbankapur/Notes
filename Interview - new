@@ -333,4 +333,65 @@ Use watch docker system df to monitor usage over time.
 Set up CI/CD pipelines to use optimized images.
 Use docker save and docker load for moving images between systems without rebuilding.
 
+8)explain me the process how to store logs of a containers in pod
+1. Default Logging Behavior in Kubernetes
+By default:
+Container logs are written to files on the node's filesystem:
+/var/log/containers/
+/var/lib/docker/containers/<container-id>/*.log
+Kubernetes collects logs from these files and makes them viewable via:
+
+kubectl logs <pod-name>
+⚠️ These logs are non-persistent — they are lost when the pod or container is deleted.
+
+📦 2. Storing Logs Inside the Pod (Not Recommended)
+You can configure your app to write logs to a file inside the container, e.g., /app/logs/app.log.
+But this is not persistent unless:
+
+🔸 You use a volume (PVC or hostPath):
+
+volumeMounts:
+  - name: log-volume
+    mountPath: /app/logs
+volumes:
+  - name: log-volume
+    persistentVolumeClaim:
+      claimName: log-pvc
+This will store logs outside the container, so even if the container restarts, the logs remain.
+
+🚀 3. Centralized Logging (Recommended for Production)
+Use sidecar containers or DaemonSets to ship logs elsewhere.
+
+🔹 Option 1: Sidecar Container with Shared Volume
+
+containers:
+- name: app
+  image: myapp
+  volumeMounts:
+    - name: logs
+      mountPath: /app/logs
+
+- name: log-shipper
+  image: busybox
+  args: ["tail", "-f", "/app/logs/app.log"]
+  volumeMounts:
+    - name: logs
+      mountPath: /app/logs
+
+volumes:
+- name: logs
+  emptyDir: {}
+This example shows:
+Main container writes to /app/logs/app.log
+Sidecar container tails and processes those logs
+You can replace log-shipper with a real log shipper (like Fluent Bit, Logstash, etc.).
+
+Practice	Reason
+Use stdout/stderr for logs	Works with kubectl logs and log collectors
+Don’t store logs inside the container FS	Lost when the container dies
+Use volumes for persistence	Keeps logs after restarts
+Use DaemonSet for scalability	Works across all pods and nodes
+
+
+
 
