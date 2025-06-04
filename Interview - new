@@ -1,0 +1,336 @@
+how to check ram, cpu in linux?
+You can check RAM and CPU information in Linux using several commands. Here are the most common ones:
+
+🔍 Check RAM Usage
+1. free -h
+Displays total, used, and free memory in a human-readable format.
+
+free -h
+2. top or htop
+Real-time memory (and CPU) usage.
+
+top
+htop is a better, interactive version (install using sudo apt install htop or sudo yum install htop).
+
+3. cat /proc/meminfo
+Shows detailed memory statistics.
+
+cat /proc/meminfo
+🧠 Check CPU Info
+1. lscpu
+Displays detailed CPU architecture info.
+
+lscpu
+2. cat /proc/cpuinfo
+Lists all CPU cores and details.
+
+cat /proc/cpuinfo
+3. nproc
+Shows number of processing units available.
+
+nproc
+4. top or htop
+Shows CPU usage in real-time.
+
+2) how to check ram and memory usage by services
+To check RAM and memory usage by services or processes in Linux, here are the most effective ways:
+
+✅ 1. top or htop (Recommended for Live Monitoring)
+🔹 top
+top
+Press M (uppercase) to sort by memory usage.
+
+Columns to look for:
+
+%MEM: percentage of RAM used
+
+RES: resident memory used
+
+🔹 htop (nicer interface, shows services grouped)
+htop
+You may need to install it first:
+
+sudo apt install htop     # Debian/Ubuntu
+sudo yum install htop     # RHEL/CentOS
+✅ 2. ps Command (Script-Friendly)
+🔹 Show Top Memory-Consuming Processes
+
+ps aux --sort=-%mem | head -n 10
+aux: list all processes
+
+--sort=-%mem: sort by memory usage (descending)
+
+🔹 Group memory usage by service name (approx.)
+
+ps -eo pid,comm,%mem,%cpu --sort=-%mem | head -n 10
+Shows PID, command, memory %, and CPU %
+
+✅ 3. smem (Accurate Memory Accounting)
+More detailed than ps (shows PSS – proportional set size).
+
+sudo apt install smem     # Debian/Ubuntu
+sudo yum install smem     # RHEL/CentOS
+
+smem -r | head
+✅ 4. systemd-cgtop (For systemd-managed services)
+If your system uses systemd, this tool shows real-time memory & CPU usage per systemd service.
+
+sudo systemd-cgtop
+Summary Table:
+Command	Use Case
+top / htop	Live process monitoring
+ps aux --sort=-%mem	Quick top memory users
+smem	Accurate memory per process
+systemd-cgtop	Usage grouped by systemd services
+
+3)listing zombie or deamon process
+Process Type	How to List
+Zombie	`ps aux
+Daemon	`ps -eo pid,ppid,cmd
+
+3)how to create users in linux and configure it
+sudo adduser username
+sudo passwd username
+sudo usermod -aG sudo username 
+
+4)how to provide permissions to user
+🔹 Change ownership (user & group)
+sudo chown username filename
+sudo chown username:groupname filename
+🔹 Create a group & add user
+sudo groupadd devgroup
+sudo usermod -aG devgroup username
+🔹 Assign group ownership to a file/folder
+sudo chown :devgroup /var/www/html
+
+Task	Command
+Change file owner	chown username file
+Change file permissions	chmod 755 file
+Add user to group	usermod -aG groupname username
+Grant sudo access	usermod -aG sudo username
+Restrict sudo to one command	visudo + specific command config
+
+5) what if disk usage is full in linux
+🔍 1. Check Disk Usage
+Overall disk usage:
+df -h
+Look for partitions with 100% or high usage.
+
+Disk usage by directory:
+du -h --max-depth=1 / | sort -hr | head -n 10
+Shows which folders use the most space (e.g., /var, /home, /tmp)
+
+🧹 2. Clean Up Space
+🔸 Delete log files (often the culprit)
+sudo journalctl --vacuum-time=7d       # Keep only 7 days of logs
+sudo rm -rf /var/log/*.gz /var/log/*.1 /var/log/syslog.*
+🔸 Remove orphaned packages & cache
+sudo apt autoremove && sudo apt clean      # Debian/Ubuntu
+sudo yum autoremove && sudo yum clean all  # RHEL/CentOS
+🔸 Clean package cache
+sudo du -sh /var/cache/apt     # Debian
+sudo du -sh /var/cache/yum     # RHEL
+🔸 Clear temporary files
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+🔸 Find and delete large files
+sudo find / -type f -size +100M -exec ls -lh {} \;
+Then review and delete:
+sudo rm -f /path/to/largefile
+🔄 3. Move Data to Another Disk (if needed)
+Mount external disk or attach EBS volume (in cloud)
+
+Move large files or logs to /mnt/newdisk or similar
+
+Create symlinks if necessary:
+
+ln -s /mnt/newdisk/bigfile /original/location/bigfile
+🛡️ 4. Prevent Future Issues
+Set log rotation (logrotate)
+
+Monitor disk usage regularly (e.g., cron + df)
+
+Use tools like:
+
+ncdu — interactive disk usage analyzer
+
+duf — disk usage with nicer UI
+
+6)how to check on which port service is running
+🔹 Show all listening ports:
+ss -tuln
+Show which service/process is using a port:
+sudo ss -tulnp
+sudo netstat -tulnp
+sudo systemctl status nginx
+ Example: Find what’s using port 8080
+sudo lsof -i :8080
+# OR
+sudo ss -tulnp | grep 8080
+
+7)proxy and reverse proxy
+🔄 Proxy Server
+Acts as an intermediary for client requests going outward to the internet or other networks.
+
+The client connects to the proxy, and the proxy forwards the request to the target server.
+
+Commonly used for:
+
+Privacy/anonymity (client’s IP hidden)
+
+Caching content for faster access
+
+Access control and filtering (e.g., block certain sites)
+
+Bypassing geo-restrictions
+
+Diagram:
+Client → Proxy Server → Internet / Target Server
+Examples:
+Squid proxy
+
+HTTP Proxy, SOCKS Proxy
+
+🔙 Reverse Proxy
+Acts as an intermediary for server requests coming inward from clients.
+
+The client connects to the reverse proxy, and the reverse proxy forwards the request to one or more backend servers.
+
+Commonly used for:
+
+Load balancing among multiple servers
+
+SSL termination (handle HTTPS)
+
+Caching responses to reduce backend load
+
+Security — hide backend server details
+
+Compression and request routing
+
+Diagram:
+Client → Reverse Proxy → Backend Servers
+Examples:
+Nginx (as reverse proxy)
+
+HAProxy
+
+Apache HTTP Server (with mod_proxy)
+
+Summary Table
+Aspect	Proxy	Reverse Proxy
+Client role	Client initiates request	Client connects to reverse proxy
+Direction	Forwards client → internet	Forwards client → backend servers
+Purpose	Privacy, caching, filtering	Load balancing, security, SSL termination
+IP seen by target	Proxy’s IP	Reverse proxy’s IP
+Example use cases	Web browsing via proxy server	Serving web apps behind Nginx
+
+
+The curl command is a powerful tool in Linux used to transfer data to or from a server using various protocols (HTTP, HTTPS, FTP, etc.). It's commonly used for testing APIs, downloading files, and debugging network requests.
+
+an application deployed in AWS ec2 not able to access the application using browser how to debug ?
+
+🔹 1. Check if the Application is Running
+SSH into the EC2 instance:
+ssh ec2-user@<your-ec2-public-ip>
+Then run:
+ps aux | grep <your_app>
+# OR
+sudo netstat -tulnp | grep LISTEN
+# OR
+sudo ss -tulnp
+✅ Make sure it's running and listening on the expected port (e.g., 80, 3000, 8080, etc.)
+
+🔹 2. Check Application Bind Address
+Your app should bind to 0.0.0.0, not 127.0.0.1 (localhost) to accept external traffic.
+
+Fix example (Node.js):
+app.listen(3000, '0.0.0.0');
+🔹 3. Check EC2 Security Group
+Go to EC2 Console → Instances → Security → Security Groups.
+
+Ensure inbound rules allow traffic:
+
+Type	Protocol	Port	Source
+HTTP	TCP	80	0.0.0.0/0
+HTTPS	TCP	443	0.0.0.0/0
+Custom TCP	TCP	<Your App Port>	0.0.0.0/0
+
+Add the necessary rules if missing.
+
+🔹 4. Check EC2 Network ACLs and VPC
+If you have a restrictive Network ACL, make sure inbound and outbound rules allow traffic on your port.
+
+✅ Also verify the EC2 instance is in a public subnet with:
+
+A route to an internet gateway
+
+A public IP or Elastic IP assigned
+
+7)what if docker image size is full
+Check Image Sizes
+docker images
+Look at the SIZE column.
+
+You’ll often find large images or unused tags.
+
+🧹 2. Clean Up Unused Resources
+🔸 Remove stopped containers:
+docker container prune
+🔸 Remove unused images (dangling or not used):
+docker image prune
+To remove all unused images:
+
+docker image prune -a
+🔸 Remove unused volumes:
+
+docker volume prune
+🔸 Remove unused networks:
+
+docker network prune
+🔸 Remove everything unused:
+
+docker system prune -a
+⚠️ This will remove all stopped containers, dangling images, networks, and volumes not used by any container.
+
+🔍 3. Analyze What’s Taking Up Space
+
+docker system df
+This shows how much disk space is used by:
+
+Images
+Containers
+Volumes
+Build cache
+
+🔧 4. Reduce Docker Image Size (for Developers)
+If you're building your own image, optimize it:
+
+Use slim base images:
+e.g., python:3.11-slim, node:alpine, debian:bookworm-slim
+
+Multi-stage builds:
+Only copy needed binaries/artifacts in the final image.
+
+Clean up apt/pip/npm/yum cache during install:
+Dockerfile
+RUN apt-get update && apt-get install -y ... && rm -rf /var/lib/apt/lists/*
+Avoid copying unnecessary files:
+Use .dockerignore like .gitignore
+
+🚨 5. If Disk Is Already Full
+Delete unused images manually:
+
+docker rmi <image_id>
+Stop Docker and manually delete:
+
+sudo systemctl stop docker
+sudo rm -rf /var/lib/docker
+⚠️ This deletes everything Docker-related. Only use if you're okay with a full reset.
+
+🛑 Final Tips
+Use watch docker system df to monitor usage over time.
+Set up CI/CD pipelines to use optimized images.
+Use docker save and docker load for moving images between systems without rebuilding.
+
+
