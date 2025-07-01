@@ -1,0 +1,280 @@
+📘 Basic TAC Questions and Answers
+✅ 1. What is TAC?
+Answer:
+TAC stands for Technical Assistance Center. It is a support service provided by technology companies (e.g., Cisco, Juniper, Dell, etc.) to help customers troubleshoot technical problems with their products.
+TAC engineers handle:
+
+Technical issues
+
+Escalations
+
+Software/hardware diagnostics
+
+Bug reporting and patching
+
+✅ 2. What are the common tasks of a TAC engineer?
+Answer:
+
+Analyzing customer tickets and issues
+
+Providing step-by-step troubleshooting
+
+Escalating bugs to R&D if needed
+
+Creating knowledge base articles
+
+Monitoring ticket status in tools like Jira, ServiceNow, or Salesforce
+
+✅ 3. What tools are commonly used in TAC?
+Answer:
+
+Ticketing tools: Jira, ServiceNow, Zendesk, Salesforce
+
+Remote tools: SSH, RDP, TeamViewer, AnyDesk
+
+Monitoring tools: Nagios, Zabbix, SolarWinds
+
+Network tools: Wireshark, traceroute, ping, netstat, telnet
+
+✅ 4. What are the basic steps for troubleshooting a customer issue?
+Answer:
+
+Understand and confirm the issue (read ticket carefully).
+
+Collect logs, configurations, or screenshots.
+
+Reproduce the issue (if possible).
+
+Analyze data (logs, system state, versions).
+
+Provide resolution or workaround.
+
+If unresolved, escalate to higher support tier or engineering.
+
+✅ 5. How do you handle high-priority (P1) or escalation tickets?
+Answer:
+
+Acknowledge the ticket immediately.
+
+Set up a call or remote session ASAP.
+
+Keep clear and regular communication with the customer.
+
+Work collaboratively with other internal teams (e.g., DevOps or Engineering).
+
+Document everything and update the ticket until resolved.
+
+✅ 6. What is the difference between L1, L2, and L3 support in TAC?
+Answer:
+
+L1 (Tier 1): Basic troubleshooting, ticket triage, password resets.
+
+L2 (Tier 2): Deeper technical expertise, product-level troubleshooting, log analysis.
+
+L3 (Tier 3): Escalations, complex bugs, handled by developers or specialists.
+
+✅ 7. What should you do if you don’t know the answer to a customer’s problem?
+Answer:
+
+Acknowledge the customer and let them know you’re investigating.
+
+Gather more information.
+
+Check internal knowledge bases or escalate to L2/L3.
+
+Never guess or give incorrect advice.
+
+✅ 8. What is meant by RCA in TAC?
+Answer:
+RCA = Root Cause Analysis
+It’s a detailed investigation to determine the underlying cause of a problem after it’s resolved.
+It includes:
+
+Description of the issue
+
+Steps taken to resolve
+
+Logs and findings
+
+Final root cause
+
+Preventive recommendations
+
+Would you like me to generate mock TAC interview questions, scenario-based troubleshooting Q&A, or incident report samples?
+
+
+
+
+
+
+
+
+You said:
+give me more questions and more complex
+
+
+ChatGPT said:
+Here are more advanced and complex TAC (Technical Assistance Center) interview-style questions with detailed answers, focused on networking, protocols, escalation handling, and troubleshooting — suitable for L2/L3 or experienced TAC roles.
+
+🔧 Advanced TAC Interview Questions and Answers
+✅ 1. How do you troubleshoot intermittent packet loss in a network?
+Answer:
+
+Check interface statistics on routers/switches for errors, CRCs, drops.
+
+Use ping with large packet sizes and TTL to identify where loss begins.
+
+Traceroute to map out the path and pinpoint the hop with delays/loss.
+
+Check CPU/memory utilization on devices.
+
+Examine logs (syslog, SNMP traps) for congestion or flapping interfaces.
+
+If on wireless, inspect SNR and interference levels.
+
+Use packet capture (Wireshark) if needed.
+
+✅ 2. What steps would you take for a high-severity P1 escalation involving a production outage?
+Answer:
+
+Acknowledge ticket immediately (SLA critical).
+
+Get on a bridge call with stakeholders.
+
+Collect initial information: impact scope, topology, recent changes.
+
+Perform quick diagnostics (ping, port status, logs).
+
+Roll back recent changes if outage is change-induced.
+
+Involve senior engineers or L3 if root cause is unclear.
+
+Provide timely updates and begin RCA documentation.
+
+✅ 3. What is the difference between a broadcast domain and a collision domain?
+Answer:
+
+Broadcast Domain: All devices that receive broadcast frames. Controlled by routers or VLANs.
+
+Collision Domain: Where data packets can collide. Affects legacy hubs or half-duplex links.
+
+Switches segment collision domains, but not broadcast domains unless VLANs are used.
+
+✅ 4. Describe how DNS resolution works and what you’d check if DNS is failing.
+Answer:
+
+DNS query sent to local resolver (usually ISP or internal DNS).
+
+If cache miss → query root server → TLD → authoritative server.
+
+IP returned to client.
+
+Troubleshooting DNS failure:
+
+Check if DNS server is reachable (nslookup, dig).
+
+Validate DNS server IP in client configuration.
+
+Inspect firewall or port blocks (UDP/53, TCP/53).
+
+Look for DNS spoofing or redirection.
+
+✅ 5. What’s the difference between STP and RSTP? How do you troubleshoot STP issues?
+Answer:
+
+STP (Spanning Tree Protocol): Prevents loops by blocking redundant paths.
+
+RSTP (Rapid STP): Faster convergence (seconds vs 30+ sec for STP).
+
+To troubleshoot:
+
+Identify root bridge with show spanning-tree.
+
+Look for TCA (Topology Change Acknowledgments) or frequent topology changes.
+
+Check port states (Blocking, Forwarding).
+
+Investigate any BPDU filtering/guard issues.
+
+✅ 6. A customer reports slow application performance over the VPN. How do you proceed?
+Answer:
+
+Verify if issue is application-specific or general.
+
+Check latency and packet loss over VPN tunnel (ping, traceroute).
+
+Inspect VPN tunnel status and encryption overhead (CPU usage).
+
+Analyze throughput on both ends (interface stats).
+
+Check for MTU or fragmentation issues.
+
+Validate bandwidth utilization and QoS config.
+
+Look into DNS or route-based misconfigurations.
+
+✅ 7. What causes asymmetric routing and how do you detect it?
+Answer:
+Asymmetric routing occurs when outbound and inbound traffic take different paths.
+
+Detection:
+
+Compare traceroute from both ends.
+
+Use tcpdump or Wireshark to inspect TTL and source IPs.
+
+Can cause issues with stateful firewalls, since return path doesn't match.
+
+✅ 8. What is a memory leak and how can it affect network appliances?
+Answer:
+
+A memory leak is when memory isn’t released after use.
+
+In routers/firewalls, it causes:
+
+Performance degradation
+
+Process crashes
+
+Full memory utilization → system reboot or failover
+
+Use tools like top, show memory, or SNMP graphs to monitor.
+
+✅ 9. Explain how a firewall processes packets and what logs you would analyze during a connectivity issue.
+Answer:
+
+Firewalls process packets based on:
+
+Access rules (ACLs)
+
+NAT rules
+
+Stateful inspection
+
+Zones/policies
+
+Troubleshooting:
+
+Check deny logs for blocked packets.
+
+Validate NAT translations.
+
+Inspect session tables (show conn, show session).
+
+Look for dropped connections or high CPU.
+
+✅ 10. A network interface is flapping every 10 seconds. What do you check?
+Answer:
+
+Physical layer: check cable, port, and transceiver (SFP/GBIC).
+
+Port config mismatch (speed/duplex).
+
+Errors in logs: CRCs, link-down messages.
+
+Loop in the network? Check STP state.
+
+Power issues on switch/router.
+
+Environmental issues (heat, vibration).
+
